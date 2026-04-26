@@ -10,7 +10,7 @@
 
 - [x] 2.1 Add an npm script in `package.json` for maintainers to invoke the local release preparation command.
 - [x] 2.2 Add a publish workflow step that verifies `github.ref_name` equals `v<package.json version>` before npm publication.
-- [x] 2.3 Keep the existing tag-triggered publish behavior, npm token requirement, and package verification steps intact.
+- [x] 2.3 Keep the existing tag-triggered publish behavior and package verification steps intact while using npm trusted publishing through OIDC.
 
 ## 3. Release Documentation
 

@@ -36,3 +36,16 @@ The publish workflow SHALL verify that the pushed release tag exactly matches th
 #### Scenario: Mismatched tag blocks publication
 - **WHEN** the publish workflow runs for tag `v1.2.3` and the checked-out root package version is not `1.2.3`
 - **THEN** the workflow fails before publishing to npm
+
+## MODIFIED Requirements
+
+### Requirement: npm publication SHALL run from a controlled GitHub Actions workflow
+The repository SHALL define a GitHub Actions workflow that publishes the package to npm only when a `v*` version tag is pushed, using npm trusted publishing with GitHub Actions OIDC and packaging the generated `dist/` output declared by the root package metadata.
+
+#### Scenario: Controlled release publishes package tarball
+- **WHEN** a maintainer pushes a `v*` version tag from the configured repository and workflow with npm trusted publishing enabled
+- **THEN** the workflow builds the package from repository sources and publishes the npm package through OIDC without `NPM_TOKEN` or `NODE_AUTH_TOKEN`
+
+#### Scenario: Missing trusted publisher configuration prevents release
+- **WHEN** the publish workflow runs without the required OIDC permission, matching npm trusted publisher configuration, or repository permissions
+- **THEN** the workflow fails without publishing a package

@@ -60,7 +60,9 @@ Releases are prepared locally and published by GitHub Actions after a matching v
    git push origin HEAD v1.2.3
    ```
 
-Pushing the `v<version>` tag starts the `publish` workflow. The workflow installs dependencies, verifies that the tag exactly matches the root `package.json` version, runs `npm run verify`, and publishes to npm with the repository `NPM_TOKEN` secret. If the tag and package version differ, the workflow fails before `npm publish`.
+Pushing the `v<version>` tag starts the `publish` workflow. The workflow installs dependencies, verifies that the tag exactly matches the root `package.json` version, runs `npm run verify`, and publishes to npm with npm trusted publishing through GitHub Actions OIDC. If the tag and package version differ, the workflow fails before `npm publish`.
+
+The package must be configured on npmjs.com with a trusted publisher for this repository and the `.github/workflows/publish.yml` workflow. No `NPM_TOKEN` repository secret is used for publication.
 
 ## API differences from `tailscale/hujson`
 

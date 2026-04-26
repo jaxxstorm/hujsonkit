@@ -1,6 +1,6 @@
 ## Context
 
-The repository already has a `publish` GitHub Actions workflow that runs on pushed `v*` tags, installs dependencies, verifies the package, and publishes to npm with `NPM_TOKEN`. The missing piece is the maintainer-facing local release process: updating `package.json`, producing a release commit, creating a matching tag, and documenting the push sequence that triggers the existing workflow.
+The repository already has a `publish` GitHub Actions workflow that runs on pushed `v*` tags, installs dependencies, verifies the package, and publishes to npm. Publication uses npm trusted publishing through GitHub Actions OIDC rather than a long-lived npm token. The missing piece is the maintainer-facing local release process: updating `package.json`, producing a release commit, creating a matching tag, and documenting the push sequence that triggers the existing workflow.
 
 This change is specific to TypeScript/JavaScript npm packaging and GitHub Actions. It does not change HuJSON parsing, formatting, patching, or byte-level compatibility behavior relative to `tailscale/hujson`.
 
@@ -12,6 +12,7 @@ This change is specific to TypeScript/JavaScript npm packaging and GitHub Action
 - Ensure the command creates a predictable release commit and annotated `v<version>` tag after verification passes.
 - Document the maintainer release flow, including how to push the commit and tag that starts GitHub Actions publication.
 - Add a publish-time guard that fails before npm publication when the pushed tag and `package.json` version disagree.
+- Keep npm publication tokenless by using GitHub Actions OIDC trusted publishing.
 - Keep release automation dependency-free and compatible with ordinary Node.js environments.
 
 **Non-Goals:**
@@ -35,6 +36,10 @@ This change is specific to TypeScript/JavaScript npm packaging and GitHub Action
   - Rationale: maintainers can inspect the resulting commit and tag before publishing, while still getting a repeatable process. Pushing the tag remains the intentional release trigger.
   - Alternative considered: have the script push automatically. That couples local script execution directly to publication and leaves less room to catch mistakes.
 
+- Publish through npm trusted publishing rather than `NPM_TOKEN`.
+  - Rationale: OIDC provides short-lived workflow-scoped credentials and avoids storing a long-lived publish token in GitHub secrets.
+  - Alternative considered: keep `NPM_TOKEN`. That works but is weaker operationally and does not match the repository's intended npm publishing setup.
+
 - Verify tag/package consistency in the publish workflow before publishing.
   - Rationale: GitHub Actions should fail early if someone pushes a tag that does not match package metadata, preventing an unintended npm version from being published.
   - Alternative considered: trust the local script. That does not protect manual tags or future workflow invocations.
@@ -44,4 +49,5 @@ This change is specific to TypeScript/JavaScript npm packaging and GitHub Action
 - Release script could fail on a dirty working tree or missing git identity -> Mitigation: perform explicit preflight checks and emit actionable errors before changing files.
 - Maintainer could push only the tag and not the version commit -> Mitigation: document pushing the release commit and tag together, and rely on the publish workflow checkout of the tagged commit.
 - Manual tag creation could bypass the local process -> Mitigation: publish workflow checks the `v<package.json version>` invariant before `npm publish`.
+- Trusted publisher misconfiguration on npmjs.com could block publication -> Mitigation: document that npmjs.com must trust this repository and `.github/workflows/publish.yml`.
 - Running full verification locally can make release preparation slower -> Mitigation: keep it aligned with the repository's existing `npm run verify` release confidence contract.
