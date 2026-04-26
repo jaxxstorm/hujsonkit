@@ -220,15 +220,17 @@ function formatArray(value: HujsonArray, depth: number, indent: string, allowTra
   }
 
   if (!shouldExpandArray(value, depth, indent, allowTrailingCommas)) {
-    return `[${value.elements.map((element) => formatTrimmed(element, depth, indent, allowTrailingCommas)).join(", ")}]`;
+    return `[${value.elements.map((element, index) => formatInlineArrayElement(element, index, depth, indent, allowTrailingCommas)).join(",")}]`;
   }
 
   const childDepth = depth + 1;
   const lines = value.elements.map((element, index) => {
     const comma = allowTrailingCommas || index < value.elements.length - 1 ? "," : "";
-    return `${repeatIndent(indent, childDepth)}${formatTrimmed(element, childDepth, indent, allowTrailingCommas)}${comma}`;
+    const prefix = formatExtraBeforeExpanded(element.before, childDepth, indent, index === 0);
+    const afterValue = formatExtraInline(element.after);
+    return `${prefix.text}${formatTrimmed(element, childDepth, indent, allowTrailingCommas)}${afterValue}${comma}`;
   });
-  return `[\n${lines.join("\n")}\n${repeatIndent(indent, depth)}]`;
+  return `[${lines.join("")}\n${repeatIndent(indent, depth)}]`;
 }
 
 function formatObject(value: HujsonObject, depth: number, indent: string, allowTrailingCommas: boolean): string {
@@ -238,7 +240,7 @@ function formatObject(value: HujsonObject, depth: number, indent: string, allowT
   }
 
   if (!shouldExpandObject(value, depth, indent, allowTrailingCommas)) {
-    return `{${value.members.map((member) => formatInlineMember(member, depth, indent, allowTrailingCommas)).join(", ")}}`;
+    return `{${value.members.map((member, index) => formatInlineMember(member, index, depth, indent, allowTrailingCommas)).join(",")}}`;
   }
 
   const childDepth = depth + 1;
@@ -293,29 +295,45 @@ function formatObject(value: HujsonObject, depth: number, indent: string, allowT
       beforeColon || afterColon
         ? `${beforeColon || ""}:${afterColon || " "}`
         : `:${valueSpaces.get(row.index) ?? " "}`;
-    return `${row.prefix.text}${row.name}${separator}${row.formattedValue}${comma}`;
+    const afterValue = formatExtraInline(row.member.value.after);
+    return `${row.prefix.text}${row.name}${separator}${row.formattedValue}${afterValue}${comma}`;
   });
 
   return `{${lines.join("")}\n${repeatIndent(indent, depth)}}`;
 }
 
-function formatInlineMember(
-  member: HujsonObjectMember,
+function formatInlineArrayElement(
+  element: HujsonValue,
+  index: number,
   depth: number,
   indent: string,
   allowTrailingCommas: boolean
 ): string {
+  const before = formatExtraInline(element.before) || (index === 0 ? "" : " ");
+  const after = formatExtraInline(element.after);
+  return `${before}${formatTrimmed(element, depth, indent, allowTrailingCommas)}${after}`;
+}
+
+function formatInlineMember(
+  member: HujsonObjectMember,
+  index: number,
+  depth: number,
+  indent: string,
+  allowTrailingCommas: boolean
+): string {
+  const beforeName = formatExtraInline(member.name.before) || (index === 0 ? "" : " ");
   const beforeColon = formatExtraInline(member.name.after);
   const afterColon = formatExtraInline(member.value.before);
   const separator = beforeColon || afterColon ? `${beforeColon || ""}:${afterColon || " "}` : ": ";
-  return `${formatLiteral(member.name)}${separator}${formatTrimmed(member.value, depth, indent, allowTrailingCommas)}`;
+  const afterValue = formatExtraInline(member.value.after);
+  return `${beforeName}${formatLiteral(member.name)}${separator}${formatTrimmed(member.value, depth, indent, allowTrailingCommas)}${afterValue}`;
 }
 
 function shouldExpandArray(value: HujsonArray, depth: number, indent: string, allowTrailingCommas: boolean): boolean {
   if (value.afterExtra.includes("\n") || value.elements.some((element) => element.before.includes("\n") || (element.after ?? "").includes("\n"))) {
     return true;
   }
-  const inline = `[${value.elements.map((element) => formatTrimmed(element, depth, indent, allowTrailingCommas)).join(", ")}]`;
+  const inline = `[${value.elements.map((element, index) => formatInlineArrayElement(element, index, depth, indent, allowTrailingCommas)).join(",")}]`;
   return lineLength(inline) > 80;
 }
 
@@ -332,7 +350,7 @@ function shouldExpandObject(value: HujsonObject, depth: number, indent: string, 
   ) {
     return true;
   }
-  const inline = `{${value.members.map((member) => formatInlineMember(member, depth, indent, allowTrailingCommas)).join(", ")}}`;
+  const inline = `{${value.members.map((member, index) => formatInlineMember(member, index, depth, indent, allowTrailingCommas)).join(",")}}`;
   return lineLength(inline) > 80;
 }
 
@@ -352,7 +370,8 @@ function formatExtraBeforeExpanded(
 ): { text: string; commentCount: number } {
   const normalized = normalizeEndlines(extra);
   const comments = extractComments(normalized).map((comment) => comment.trimEnd());
-  const blankLine = !first && countNewlines(normalized) > 1;
+  const newlineCount = countNewlines(normalized);
+  const blankLine = !first && (comments.length === 0 ? newlineCount > 1 : newlineCount > comments.length + 1);
   let text = blankLine ? "\n\n" : "\n";
   for (const comment of comments) {
     text += `${repeatIndent(indent, depth)}${formatComment(comment, depth, indent)}\n`;
@@ -434,12 +453,12 @@ function isStandard(value: HujsonValue): boolean {
     case "literal":
       return true;
     case "array":
-      if (hasComment(value.afterExtra) || hasTrailingComma(value.elements, value.afterExtra)) {
+      if (hasComment(value.afterExtra) || hasTrailingComma(value.elements)) {
         return false;
       }
       return value.elements.every(isStandard);
     case "object":
-      if (hasComment(value.afterExtra) || hasTrailingComma(value.members.map((member) => member.value), value.afterExtra)) {
+      if (hasComment(value.afterExtra) || hasTrailingComma(value.members.map((member) => member.value))) {
         return false;
       }
       return value.members.every(
@@ -448,8 +467,8 @@ function isStandard(value: HujsonValue): boolean {
   }
 }
 
-function hasTrailingComma(values: HujsonValue[], afterExtra: string): boolean {
-  return values.length > 0 && values[values.length - 1].after !== null && afterExtra !== "";
+function hasTrailingComma(values: HujsonValue[]): boolean {
+  return values.length > 0 && values[values.length - 1].after !== null;
 }
 
 function packValue(value: HujsonValue, includeAfter: boolean): string {

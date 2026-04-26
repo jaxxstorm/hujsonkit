@@ -23,6 +23,26 @@
       "expected": "[null, null]\n"
     },
     {
+      "name": "array-trailing-comma-with-empty-closing-extra",
+      "input": "[1,]",
+      "expected": "[1]\n"
+    },
+    {
+      "name": "object-trailing-comma-with-empty-closing-extra",
+      "input": "{\"a\":1,}",
+      "expected": "{\"a\": 1}\n"
+    },
+    {
+      "name": "array-value-extras",
+      "input": "[1 /*keep*/, /*next*/ 2]",
+      "expected": "[1 /*keep*/ , /*next*/ 2]\n"
+    },
+    {
+      "name": "object-member-value-extras",
+      "input": "{\"a\": 1 /*keep*/, \"b\": 2}",
+      "expected": "{\"a\": 1 /*keep*/ , \"b\": 2}\n"
+    },
+    {
       "name": "comments-and-trailing-commas",
       "input": "{\n  // note\n  \"alpha\": [1, 2,],\n  \"beta\": {\n    \"nested\": true,\n  },\n}",
       "expected": "{\n\t// note\n\t\"alpha\": [1, 2],\n\t\"beta\": {\n\t\t\"nested\": true,\n\t},\n}\n"
