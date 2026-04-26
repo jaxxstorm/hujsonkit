@@ -1,6 +1,6 @@
 {
   "name": "@jaxxstorm/hujsonkit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "TypeScript/JavaScript HuJSON toolkit compatible with tailscale/hujson semantics.",
   "license": "MIT",
   "type": "commonjs",
