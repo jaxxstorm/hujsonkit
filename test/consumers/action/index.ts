@@ -1,4 +1,4 @@
-import { parse, type HujsonValue } from "hujsonkit";
+import { parse, type HujsonValue } from "@jaxxstorm/hujsonkit";
 
 const value: HujsonValue = parse('{"workflow":true}');
 

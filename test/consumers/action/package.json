@@ -1,4 +1,7 @@
 {
   "name": "hujsonkit-action-consumer",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@jaxxstorm/hujsonkit": "*"
+  }
 }
