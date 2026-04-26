@@ -1,8 +1,4 @@
-## Purpose
-
-Define the shared fixture set and compatibility documentation needed to validate JavaScript/TypeScript behavior against upstream HuJSON semantics.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Compatibility fixtures SHALL cover upstream HuJSON semantics
 The repository SHALL include shared fixtures and expected outputs that exercise the `tailscale/hujson` behavior being targeted, including comments, trailing commas, formatting behavior, formatter-dependent hash behavior, patch behavior, valid standard JSON, invalid input handling, JSON Pointer lookup behavior, traversal order, and deterministic fuzz seed invariants. The shared fixture corpus SHALL include upstream-derived cases from the Go `hujson` tests where those cases map to language-agnostic behavior.
@@ -21,18 +17,11 @@ The repository SHALL include shared fixtures and expected outputs that exercise 
 
 #### Scenario: Fixtures include upstream formatter hash cases
 - **WHEN** a maintainer inspects the shared fixture set
-- **THEN** it contains at least one upstream-derived policy fixture whose expected formatted bytes and SHA-256 hash are generated from upstream `tailscale/hujson.Format`
+- **THEN** it contains at least one realistic Tailscale policy input with the upstream Go `hujson.Format` output and SHA-256 hash used to validate formatter-dependent ETag behavior
 
 #### Scenario: Fixtures include upstream patch and pointer cases
 - **WHEN** a maintainer inspects the shared fixture set
 - **THEN** it contains upstream-derived RFC 6902 patch cases and JSON Pointer lookup cases with expected outputs, expected errors, or documented divergence metadata
-
-### Requirement: Compatibility verification SHALL include byte-preserving round trips
-The test strategy SHALL include shared cases that prove unchanged parsed values serialize back to the original bytes for supported inputs.
-
-#### Scenario: Round-trip fixture validates exact preservation
-- **WHEN** a shared round-trip fixture is parsed and then serialized without mutation
-- **THEN** the serialized bytes match the original fixture bytes exactly
 
 ### Requirement: Fixture provenance and intentional deviations SHALL be documented
 Any fixture derived from upstream `tailscale/hujson` tests or behavior SHALL record its source or rationale, and any intentional JavaScript/TypeScript divergence SHALL be documented alongside the affected compatibility case. Formatter fixtures that represent supported upstream behavior SHALL use upstream Go bytes as the expected output rather than documenting the current JavaScript formatter output as an accepted divergence.
@@ -42,16 +31,9 @@ Any fixture derived from upstream `tailscale/hujson` tests or behavior SHALL rec
 - **THEN** the related fixture or compatibility documentation explains the difference and why it is accepted
 
 #### Scenario: Upstream-derived fixture source is discoverable
-- **WHEN** a fixture is derived from an upstream `tailscale/hujson` test group
-- **THEN** the fixture metadata or provenance documentation identifies the upstream test group or GitOps formatter/hash behavior and the kind of behavior being covered
+- **WHEN** a fixture is derived from an upstream `tailscale/hujson` test group or GitOps formatter/hash behavior
+- **THEN** the fixture metadata or provenance documentation identifies the upstream source and the kind of behavior being covered
 
 #### Scenario: Formatter divergence is not accepted for supported cases
-- **WHEN** a formatter fixture covers a supported upstream behavior
-- **THEN** the fixture expected output is generated from upstream Go formatter bytes instead of from a JavaScript-specific approximation
-
-### Requirement: Shared upstream fixtures SHALL remain reusable across implementations
-The upstream-derived compatibility fixtures SHALL use language-agnostic data formats and expected observable behavior so JavaScript/TypeScript and future language implementations can consume the same corpus without copying implementation-specific test code.
-
-#### Scenario: Future implementation consumes shared corpus
-- **WHEN** a future language implementation adds compatibility tests
-- **THEN** it can read the shared upstream-derived fixture files and evaluate the cases that map to its public API without depending on JavaScript test helpers
+- **WHEN** a format fixture covers supported upstream `tailscale/hujson.Format` behavior
+- **THEN** fixture provenance does not mark differing JavaScript `JSON.stringify` pretty output as an accepted compatibility divergence

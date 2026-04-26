@@ -20,7 +20,7 @@ The JavaScript/TypeScript library SHALL parse HuJSON input into an AST-oriented 
 - **THEN** parsing fails with an error that identifies the expected failure class or message substring
 
 ### Requirement: Core transformations SHALL match upstream HuJSON behavior
-The library SHALL expose transformation operations equivalent in practical behavior to upstream `Minimize`, `Standardize`, `Format`, and `Patch`, with any JavaScript-specific API differences documented without changing the normative output semantics. Implementation tests SHALL include upstream-derived transformation and patch cases where the behavior is supported, and SHALL explicitly document any accepted divergence.
+The library SHALL expose transformation operations equivalent in practical behavior to upstream `Minimize`, `Standardize`, `Format`, and `Patch`, with any JavaScript-specific API differences documented without changing the normative output semantics. `Format` output for supported HuJSON inputs SHALL be byte-compatible with upstream `tailscale/hujson.Format`, including cases whose bytes are used for formatter-dependent hashes or ETags. Implementation tests SHALL include upstream-derived transformation and patch cases where the behavior is supported, and SHALL explicitly document any accepted divergence.
 
 #### Scenario: Standardize removes HuJSON-only syntax
 - **WHEN** a consumer standardizes a value that contains comments or trailing commas
@@ -29,6 +29,14 @@ The library SHALL expose transformation operations equivalent in practical behav
 #### Scenario: Format normalizes layout deterministically
 - **WHEN** a consumer formats semantically identical HuJSON values multiple times
 - **THEN** each formatting pass produces the same canonical output bytes
+
+#### Scenario: Format matches upstream Go bytes
+- **WHEN** a consumer formats a supported upstream-derived HuJSON fixture
+- **THEN** the emitted bytes match the bytes produced by upstream `tailscale/hujson.Format` for the same input
+
+#### Scenario: Formatter-dependent policy hash matches upstream GitOps behavior
+- **WHEN** a consumer computes a SHA-256 hash from formatted HuJSON bytes for a supported Tailscale policy fixture
+- **THEN** the hash matches the hash produced by upstream Go code that applies `tailscale/hujson.Format` before hashing
 
 #### Scenario: Patch applies RFC 6902 operations to the syntax tree
 - **WHEN** a consumer applies a valid JSON Patch document to a parsed HuJSON value

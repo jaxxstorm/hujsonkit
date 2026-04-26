@@ -16,15 +16,52 @@ The repository SHALL define a GitHub Actions workflow that runs for pull request
 - **THEN** the workflow reports a failing status so the change is not treated as release-ready
 
 ### Requirement: npm publication SHALL run from a controlled GitHub Actions workflow
-The repository SHALL define a GitHub Actions workflow that publishes the package to npm only when a `v*` version tag is pushed, using npm authentication configured in GitHub and packaging the generated `dist/` output declared by the root package metadata.
+The repository SHALL define a GitHub Actions workflow that publishes the package to npm only when a `v*` version tag is pushed, using npm trusted publishing with GitHub Actions OIDC and packaging the generated `dist/` output declared by the root package metadata.
 
 #### Scenario: Controlled release publishes package tarball
-- **WHEN** a maintainer pushes a `v*` version tag with valid npm credentials available to GitHub Actions
-- **THEN** the workflow builds the package from repository sources and publishes the npm package that includes the generated `dist/` files and declared metadata
+- **WHEN** a maintainer pushes a `v*` version tag from the configured repository and workflow with npm trusted publishing enabled
+- **THEN** the workflow builds the package from repository sources and publishes the npm package through OIDC without requiring `NPM_TOKEN` or `NODE_AUTH_TOKEN`
 
-#### Scenario: Missing publish credentials prevents release
-- **WHEN** the publish workflow runs without the required npm token or repository permissions
+#### Scenario: Missing trusted publisher configuration prevents release
+- **WHEN** the publish workflow runs without OIDC permission, matching npm trusted publisher configuration, or required repository permissions
 - **THEN** the workflow fails without publishing a package
+
+### Requirement: Maintainers SHALL prepare releases with a local version bump command
+The repository SHALL provide a local maintainer command that validates a requested release version, updates the root package metadata version, and reports the exact commit and tag commands needed to trigger publication. The command SHALL not publish to npm directly.
+
+#### Scenario: Maintainer prepares a patch release
+- **WHEN** a maintainer runs the release preparation command with a `patch` release argument
+- **THEN** the root package version is incremented by one patch version and the command reports the matching `vX.Y.Z` tag to create after committing the version bump
+
+#### Scenario: Maintainer prepares an explicit release version
+- **WHEN** a maintainer runs the release preparation command with an explicit semantic version
+- **THEN** the root package version is set to that version and the command reports the matching `vX.Y.Z` tag to create after committing the version bump
+
+#### Scenario: Invalid release argument fails before changing package metadata
+- **WHEN** a maintainer runs the release preparation command with an invalid release argument
+- **THEN** the command fails without changing `package.json`
+
+### Requirement: Release documentation SHALL describe the manual push trigger
+The repository documentation SHALL describe a maintainer release process that runs verification locally, prepares the package version locally, commits the version bump, creates a matching version tag, and pushes the commit and tag to GitHub so the publish workflow is triggered by the tag.
+
+#### Scenario: Maintainer follows documented process
+- **WHEN** a maintainer follows the release documentation for version `X.Y.Z`
+- **THEN** the maintainer produces a commit that updates package metadata and pushes tag `vX.Y.Z`, which is the only event that triggers npm publication
+
+#### Scenario: Maintainer reviews before publishing
+- **WHEN** the local preparation command completes
+- **THEN** the documentation instructs the maintainer to inspect the diff and run verification before pushing the release tag
+
+### Requirement: Tag-triggered publication SHALL verify tag and package version consistency
+The publish workflow SHALL compare the pushed `v*` tag with the root package version before publishing, and SHALL refuse to publish when they differ.
+
+#### Scenario: Matching tag and package version publishes
+- **WHEN** the pushed tag is `vX.Y.Z` and the root package version is `X.Y.Z`
+- **THEN** the workflow continues to package verification and npm publication
+
+#### Scenario: Mismatched tag and package version fails before publishing
+- **WHEN** the pushed tag version differs from the root package version
+- **THEN** the workflow fails before running `npm publish`
 
 ### Requirement: Release automation SHALL preserve documented package consumption paths
 The automation SHALL publish and verify the package through the documented root entrypoints so Node.js consumers and GitHub TypeScript Action consumers continue to install and import `hujsonkit` without referencing implementation-internal paths.

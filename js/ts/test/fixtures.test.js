@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { createHash } = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -46,7 +47,7 @@ test("format is deterministic", () => {
   const twice = hujson.format(once);
   const expected = readFixture("fixtures", "compatibility", "format", "messy.formatted.json");
   assert.equal(once, twice);
-  assert.equal(once, expected.trimEnd());
+  assert.equal(once, expected);
 });
 
 test("patch applies RFC 6902 operations", () => {
@@ -107,6 +108,17 @@ test("upstream format cases and deterministic fuzz invariants", () => {
 
   for (const fixture of manifest.formatCases) {
     assert.equal(hujson.format(fixture.input), fixture.expected, fixture.name);
+  }
+
+  for (const fixture of manifest.policyHashCases) {
+    const formatted = hujson.format(fixture.input);
+    assert.equal(formatted, fixture.expected, `${fixture.name} format`);
+    assert.equal(createHash("sha256").update(formatted).digest("hex"), fixture.sha256, `${fixture.name} sha256`);
+    assert.notEqual(
+      createHash("sha256").update(formatted).digest("hex"),
+      "9c98a06f82762ac86c349a74679db2213e85d7fd4c43d464e90e3741d113c490",
+      `${fixture.name} previous mismatched sha256`
+    );
   }
 
   for (const input of manifest.fuzzInputs) {
