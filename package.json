@@ -1,0 +1,45 @@
+{
+  "name": "hujsonkit",
+  "version": "0.0.0-development",
+  "description": "TypeScript/JavaScript HuJSON toolkit compatible with tailscale/hujson semantics.",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p js/ts/tsconfig.json",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test js/ts/test/*.test.js",
+    "check:package": "npm run build && node scripts/check-package.mjs",
+    "check:consumers": "npm run build && node scripts/check-consumers.mjs",
+    "check:repo-consumer": "npm run build && node scripts/check-repo-consumer.mjs",
+    "verify": "npm test && npm run check:package && npm run check:consumers && npm run check:repo-consumer"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaxxstorm/hujsonkit.git"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jaxxstorm/hujsonkit/issues"
+  },
+  "homepage": "https://github.com/jaxxstorm/hujsonkit#readme"
+}

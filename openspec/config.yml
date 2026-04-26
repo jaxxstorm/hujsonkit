@@ -1,0 +1,51 @@
+schema: spec-driven
+
+context: |
+  Project: hujsonkit
+  Domain: A HuJSON library that is byte-compatible with https://github.com/tailscale/hujson.
+
+  Primary implementation targets:
+  - TypeScript
+  - JavaScript
+
+  Packaging and distribution:
+  - Publish to npm.
+  - The package should be straightforward to consume from Node.js projects and GitHub TypeScript Actions.
+  - Consumption should work both from npm and directly from git when appropriate.
+
+  Compatibility requirements:
+  - Match the behavior, supported features, and practical library surface of the upstream hujson library where that maps cleanly to JavaScript/TypeScript.
+  - Preserve byte-level behavior where the upstream library does so.
+  - Changes should prioritize correctness and compatibility over clever abstractions.
+
+  Architecture expectations:
+  - The repository should be laid out so additional language implementations can be added later, such as Python, without restructuring the whole project.
+  - Avoid coupling core concepts too tightly to a single language-specific package layout.
+  - Prefer a clear separation between shared spec/fixtures/test data and language-specific implementation code.
+
+  Dependency policy:
+  - Default to the JavaScript/TypeScript standard library only.
+  - Add external dependencies only when there is a specific, justified need.
+  - Security and supply-chain risk should be considered in dependency decisions.
+
+  Engineering guidance:
+  - Prefer small, composable APIs that mirror the upstream library's behavior.
+  - Favor deterministic parsing, formatting, and patching behavior.
+  - Keep the library easy to embed in automation contexts such as CI and GitHub Actions.
+
+rules:
+  proposal:
+    - State how the change preserves or improves compatibility with tailscale/hujson.
+    - Call out any behavioral differences from upstream explicitly.
+    - Describe whether the change is language-agnostic or specific to the TypeScript/JavaScript implementation.
+    - Note any packaging or GitHub Action consumption impact when relevant.
+  design:
+    - Prefer designs that keep room for future language implementations such as Python.
+    - Shared fixtures, golden files, and compatibility cases should be reusable across languages when practical.
+    - External dependencies require explicit justification and a security rationale.
+    - Keep the public API and module layout easy to consume from npm and from git-based installs.
+  tasks:
+    - Include compatibility verification against documented hujson behavior.
+    - Include tests for byte-preserving behavior when the change affects parsing, formatting, or round-tripping.
+    - Include packaging or build validation when public module layout changes.
+    - Keep tasks scoped to small, reviewable increments.

@@ -1,0 +1,75 @@
+{
+  "source": "github.com/tailscale/hujson patch tests and RFC 6902 appendix cases",
+  "cases": [
+    {
+      "name": "rfc6902-add-member",
+      "input": "{ \"foo\": \"bar\"}",
+      "operations": [{ "op": "add", "path": "/baz", "value": "qux" }],
+      "json": { "foo": "bar", "baz": "qux" }
+    },
+    {
+      "name": "rfc6902-add-array-element",
+      "input": "{ \"foo\": [ \"bar\", \"baz\" ] }",
+      "operations": [{ "op": "add", "path": "/foo/1", "value": "qux" }],
+      "json": { "foo": ["bar", "qux", "baz"] }
+    },
+    {
+      "name": "rfc6902-remove-member",
+      "input": "{\n\t\"baz\": \"qux\",\n\t\"foo\": \"bar\"\n}",
+      "operations": [{ "op": "remove", "path": "/baz" }],
+      "json": { "foo": "bar" }
+    },
+    {
+      "name": "rfc6902-replace-member",
+      "input": "{\n\t\"baz\": \"qux\",\n\t\"foo\": \"bar\"\n}",
+      "operations": [{ "op": "replace", "path": "/baz", "value": "boo" }],
+      "json": { "baz": "boo", "foo": "bar" }
+    },
+    {
+      "name": "rfc6902-move-member",
+      "input": "{\n\t\"foo\": {\n\t\t\"bar\": \"baz\",\n\t\t\"waldo\": \"fred\"\n\t},\n\t\"qux\": {\n\t\t\"corge\": \"grault\"\n\t}\n}",
+      "operations": [{ "op": "move", "from": "/foo/waldo", "path": "/qux/thud" }],
+      "json": { "foo": { "bar": "baz" }, "qux": { "corge": "grault", "thud": "fred" } }
+    },
+    {
+      "name": "rfc6902-test-failure",
+      "input": "{ \"baz\": \"qux\" }",
+      "operations": [{ "op": "test", "path": "/baz", "value": "bar" }],
+      "error": "JSON Patch test failed"
+    },
+    {
+      "name": "add-root-replaces-value",
+      "input": "\"hello\"",
+      "operations": [{ "op": "add", "path": "", "value": "goodbye" }],
+      "json": "goodbye"
+    },
+    {
+      "name": "remove-root-error",
+      "input": "\"hello\"",
+      "operations": [{ "op": "remove", "path": "" }],
+      "error": "Removing the document root"
+    },
+    {
+      "name": "pointer-escape-test",
+      "input": "{ \"/\": 9, \"~1\": 10 }",
+      "operations": [{ "op": "test", "path": "/~01", "value": 10 }],
+      "json": { "/": 9, "~1": 10 }
+    },
+    {
+      "name": "append-array-element",
+      "input": "{ \"foo\": [\"bar\"] }",
+      "operations": [{ "op": "add", "path": "/foo/-", "value": ["abc", "def"] }],
+      "json": { "foo": ["bar", ["abc", "def"]] }
+    }
+  ],
+  "divergences": [
+    {
+      "name": "comment-preserving-patch-cases",
+      "reason": "This bootstrap patch API applies RFC 6902 operations to the standardized JSON model and does not preserve comment placement across patch operations."
+    },
+    {
+      "name": "duplicate-object-member-patch-validation",
+      "reason": "The public JavaScript patch API accepts parsed operation objects, so duplicate operation member detection is not observable through this API."
+    }
+  ]
+}

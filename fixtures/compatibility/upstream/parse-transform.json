@@ -1,0 +1,125 @@
+{
+  "source": "github.com/tailscale/hujson value, minimize, and standardize tests",
+  "cases": [
+    {
+      "name": "top-level-null-with-extra",
+      "input": " null ",
+      "pack": " null ",
+      "minimize": "null",
+      "standardize": "null",
+      "upstreamStandardize": " null ",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve surrounding whitespace."
+    },
+    {
+      "name": "top-level-trailing-comma-error",
+      "input": " null,",
+      "error": "Unexpected trailing content"
+    },
+    {
+      "name": "comments-around-null",
+      "input": "//smile \r\t\n/*\r\t\n*/null//smile \r\t\n/*\r\t\n*/",
+      "pack": "//smile \r\t\n/*\r\t\n*/null//smile \r\t\n/*\r\t\n*/",
+      "minimize": "null",
+      "standardize": "null",
+      "upstreamStandardize": "         \r\t\n  \r\t\n  null         \r\t\n  \r\t\n  ",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve comment-width whitespace."
+    },
+    {
+      "name": "bad-slash-start",
+      "input": "/?",
+      "error": "Expected a HuJSON value"
+    },
+    {
+      "name": "line-comment-with-newline",
+      "input": "null//\n",
+      "pack": "null//\n",
+      "minimize": "null",
+      "standardize": "null",
+      "upstreamStandardize": "null  \n",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve comment-width whitespace."
+    },
+    {
+      "name": "unterminated-string",
+      "input": "\"\\\"\\\\\\u0022😊",
+      "error": "Unterminated string literal"
+    },
+    {
+      "name": "escaped-string",
+      "input": "\"\\\"\\\\\\u0022😊\"",
+      "pack": "\"\\\"\\\\\\u0022😊\"",
+      "minimize": "\"\\\"\\\\\\\"😊\"",
+      "standardize": "\"\\\"\\\\\\\"😊\"",
+      "upstreamMinimize": "\"\\\"\\\\\\u0022😊\"",
+      "upstreamStandardize": "\"\\\"\\\\\\u0022😊\"",
+      "divergence": "This bootstrap minimize/standardize API round-trips through JSON.parse and JSON.stringify, so equivalent string escapes can be canonicalized."
+    },
+    {
+      "name": "large-exponent-number",
+      "input": "3.14159E+435",
+      "pack": "3.14159E+435",
+      "minimize": "null",
+      "standardize": "null",
+      "divergence": "JavaScript JSON.stringify converts this non-finite numeric value to null after JSON.parse returns Infinity."
+    },
+    {
+      "name": "plus-number-error",
+      "input": "+1000",
+      "error": "Expected a HuJSON value"
+    },
+    {
+      "name": "object-with-spacing",
+      "input": " { \"k\" : \"v\" } ",
+      "pack": " { \"k\" : \"v\" } ",
+      "minimize": "{\"k\":\"v\"}",
+      "standardize": "{\"k\":\"v\"}",
+      "upstreamStandardize": " { \"k\" : \"v\" } ",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve insignificant whitespace."
+    },
+    {
+      "name": "object-with-trailing-comma",
+      "input": " { \"k\" : \"v\" , } ",
+      "pack": " { \"k\" : \"v\" , } ",
+      "minimize": "{\"k\":\"v\"}",
+      "standardize": "{\"k\":\"v\"}",
+      "upstreamStandardize": " { \"k\" : \"v\"   } ",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve trailing-comma whitespace."
+    },
+    {
+      "name": "array-with-spacing",
+      "input": " [ \"s\" ] ",
+      "pack": " [ \"s\" ] ",
+      "minimize": "[\"s\"]",
+      "standardize": "[\"s\"]",
+      "upstreamStandardize": " [ \"s\" ] ",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve insignificant whitespace."
+    },
+    {
+      "name": "array-with-trailing-comma",
+      "input": " [ \"s\" , ] ",
+      "pack": " [ \"s\" , ] ",
+      "minimize": "[\"s\"]",
+      "standardize": "[\"s\"]",
+      "upstreamStandardize": " [ \"s\"   ] ",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve trailing-comma whitespace."
+    },
+    {
+      "name": "mixed-array",
+      "input": " /**/ [ /**/ null /**/ , /**/ false /**/ , /**/ true /**/ , /**/ \"string\" /**/ , /**/ 0 /**/ , /**/ {} /**/ , /**/ [] /**/ ] /**/ ",
+      "pack": " /**/ [ /**/ null /**/ , /**/ false /**/ , /**/ true /**/ , /**/ \"string\" /**/ , /**/ 0 /**/ , /**/ {} /**/ , /**/ [] /**/ ] /**/ ",
+      "minimize": "[null,false,true,\"string\",0,{},[]]",
+      "standardize": "[null,false,true,\"string\",0,{},[]]",
+      "upstreamStandardize": "      [      null      ,      false      ,      true      ,      \"string\"      ,      0      ,      {}      ,      []      ]      ",
+      "divergence": "This bootstrap standardize/minimize API returns semantic JSON and does not preserve comment-width whitespace."
+    },
+    {
+      "name": "single-quote-error",
+      "input": " '",
+      "error": "Expected a HuJSON value"
+    },
+    {
+      "name": "emoji-start-error",
+      "input": " 💩",
+      "error": "Expected a HuJSON value"
+    }
+  ]
+}

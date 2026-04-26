@@ -1,0 +1,11 @@
+{
+  // service toggles
+  "service": {
+    /* primary value */
+    "enabled": true,
+  },
+  "tags": [
+    "a",
+    "b", // keep the trailing comma
+  ],
+}

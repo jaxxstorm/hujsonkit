@@ -1,0 +1,7 @@
+{
+  // note
+  "alpha": [1, 2,],
+  "beta": {
+    "nested": true,
+  },
+}

@@ -1,0 +1,49 @@
+{
+  "source": "github.com/tailscale/hujson format and fuzz seed tests",
+  "formatCases": [
+    { "name": "null", "input": "null", "expected": "null" },
+    {
+      "name": "empty-object",
+      "input": "{\n\r\t \n\r\t }",
+      "expected": "{}"
+    },
+    {
+      "name": "empty-array",
+      "input": "[\n\r\t \n\r\t ]",
+      "expected": "[]"
+    },
+    {
+      "name": "two-object-members",
+      "input": "{\"name\" \t \t:\"value\" \t \t,\"name\":\"value\"}",
+      "expected": "{\n  \"name\": \"value\"\n}",
+      "upstreamExpected": "{\"name\": \"value\", \"name\": \"value\"}",
+      "divergence": "This bootstrap formatter uses JSON.stringify with a two-space indent instead of upstream HuJSON single-line alignment rules."
+    },
+    {
+      "name": "two-array-elements",
+      "input": "[null \t \t,null]",
+      "expected": "[\n  null,\n  null\n]",
+      "upstreamExpected": "[null, null]",
+      "divergence": "This bootstrap formatter uses JSON.stringify with a two-space indent instead of upstream HuJSON single-line spacing rules."
+    }
+  ],
+  "fuzzInputs": [
+    " null ",
+    "//smile \r\t\n/*\r\t\n*/null//smile \r\t\n/*\r\t\n*/",
+    "\"\\\"\\\\\\u0022😊\"",
+    " { \"k\" : \"v\" , } ",
+    " [ \"s\" , ] ",
+    " /**/ [ /**/ null /**/ , /**/ false /**/ , /**/ true /**/ , /**/ \"string\" /**/ , /**/ 0 /**/ , /**/ {} /**/ , /**/ [] /**/ ] /**/ "
+  ],
+  "patchSeeds": [
+    {
+      "input": "{ \"foo\": \"bar\"}",
+      "operations": [{ "op": "add", "path": "/baz", "value": "qux" }]
+    },
+    {
+      "input": "{ \"baz\": \"qux\" }",
+      "operations": [{ "op": "test", "path": "/baz", "value": "bar" }],
+      "errorAllowed": true
+    }
+  ]
+}

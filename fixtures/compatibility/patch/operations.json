@@ -1,0 +1,5 @@
+[
+  { "op": "replace", "path": "/enabled", "value": true },
+  { "op": "add", "path": "/items/-", "value": 3 },
+  { "op": "remove", "path": "/name" }
+]
