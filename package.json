@@ -1,15 +1,20 @@
 {
-  "name": "hujsonkit",
-  "version": "0.0.0-development",
+  "name": "@jaxxstorm/hujsonkit",
+  "version": "0.1.0",
   "description": "TypeScript/JavaScript HuJSON toolkit compatible with tailscale/hujson semantics.",
   "license": "MIT",
+  "type": "commonjs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "dist",
@@ -18,7 +23,6 @@
   ],
   "scripts": {
     "build": "tsc -p js/ts/tsconfig.json",
-    "prepare": "npm run build",
     "test": "npm run build && node --test js/ts/test/*.test.js",
     "check:package": "npm run build && node scripts/check-package.mjs",
     "check:consumers": "npm run build && node scripts/check-consumers.mjs",
@@ -28,16 +32,18 @@
   "devDependencies": {
     "typescript": "^5.8.3"
   },
-  "directories": {
-    "test": "test"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jaxxstorm/hujsonkit.git"
   },
-  "keywords": [],
-  "author": "",
-  "type": "commonjs",
+  "keywords": [
+    "hujson",
+    "json",
+    "jsonc",
+    "jwcc",
+    "tailscale"
+  ],
+  "author": "Lee Briggs",
   "bugs": {
     "url": "https://github.com/jaxxstorm/hujsonkit/issues"
   },
