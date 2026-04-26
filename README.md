@@ -35,7 +35,7 @@ console.log(pack(patched));
 
 ## Release
 
-Releases are prepared locally and published by GitHub Actions after a matching version tag is pushed.
+Releases are prepared locally and published by GitHub Actions after a matching version tag is pushed. The same tag-triggered workflow publishes the package to npm and creates the matching GitHub Release.
 
 1. Start from `main` with a clean working tree.
 2. Prepare the release with one semver increment or an explicit version:
@@ -60,9 +60,9 @@ Releases are prepared locally and published by GitHub Actions after a matching v
    git push origin HEAD v1.2.3
    ```
 
-Pushing the `v<version>` tag starts the `publish` workflow. The workflow installs dependencies, verifies that the tag exactly matches the root `package.json` version, runs `npm run verify`, and publishes to npm with npm trusted publishing through GitHub Actions OIDC. If the tag and package version differ, the workflow fails before `npm publish`.
+Pushing the `v<version>` tag starts the `publish` workflow. The workflow installs dependencies, verifies that the tag exactly matches the root `package.json` version, runs `npm run verify`, publishes to npm with npm trusted publishing through GitHub Actions OIDC, and creates the matching GitHub Release with generated release notes. If the tag and package version differ, the workflow fails before `npm publish` and before GitHub Release creation.
 
-The package must be configured on npmjs.com with a trusted publisher for this repository and the `.github/workflows/publish.yml` workflow. No `NPM_TOKEN` repository secret is used for publication.
+The package must be configured on npmjs.com with a trusted publisher for this repository and the `.github/workflows/publish.yml` workflow. No `NPM_TOKEN` repository secret is used for publication. GitHub Release creation uses the workflow's repository `contents: write` permission through the default GitHub token.
 
 ## API differences from `tailscale/hujson`
 
