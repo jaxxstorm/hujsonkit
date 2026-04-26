@@ -33,6 +33,35 @@ console.log(pack(patched));
 - The pull request workflow runs the same `npm run verify` contract on GitHub Actions for pull requests against `main`.
 - Direct repository installs rely on the existing `prepare` lifecycle to build `dist/`, so `dist/` remains generated output rather than a committed source artifact.
 
+## Release
+
+Releases are prepared locally and published by GitHub Actions after a matching version tag is pushed.
+
+1. Start from `main` with a clean working tree.
+2. Prepare the release with one semver increment or an explicit version:
+
+   ```sh
+   npm run release:prepare -- patch
+   npm run release:prepare -- minor
+   npm run release:prepare -- major
+   npm run release:prepare -- 1.2.3
+   ```
+
+3. Review the generated release commit and annotated tag:
+
+   ```sh
+   git show --stat HEAD
+   git tag --list "v*" --sort=-version:refname | head
+   ```
+
+4. Push the release commit and tag together:
+
+   ```sh
+   git push origin HEAD v1.2.3
+   ```
+
+Pushing the `v<version>` tag starts the `publish` workflow. The workflow installs dependencies, verifies that the tag exactly matches the root `package.json` version, runs `npm run verify`, and publishes to npm with the repository `NPM_TOKEN` secret. If the tag and package version differ, the workflow fails before `npm publish`.
+
 ## API differences from `tailscale/hujson`
 
 - The library exposes pure functions such as `parse`, `pack`, `standardize`, `minimize`, `format`, and `patch` instead of Go-style methods that mutate a receiver in place.

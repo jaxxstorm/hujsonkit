@@ -23,10 +23,12 @@
   ],
   "scripts": {
     "build": "tsc -p js/ts/tsconfig.json",
-    "test": "npm run build && node --test js/ts/test/*.test.js",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test js/ts/test/*.test.js scripts/*.test.mjs",
     "check:package": "npm run build && node scripts/check-package.mjs",
     "check:consumers": "npm run build && node scripts/check-consumers.mjs",
     "check:repo-consumer": "npm run build && node scripts/check-repo-consumer.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs",
     "verify": "npm test && npm run check:package && npm run check:consumers && npm run check:repo-consumer"
   },
   "devDependencies": {
