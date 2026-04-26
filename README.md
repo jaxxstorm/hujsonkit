@@ -67,7 +67,7 @@ The package must be configured on npmjs.com with a trusted publisher for this re
 ## API differences from `tailscale/hujson`
 
 - The library exposes pure functions such as `parse`, `pack`, `standardize`, `minimize`, `format`, and `patch` instead of Go-style methods that mutate a receiver in place.
-- `format` produces deterministic standard JSON output. In this bootstrap it intentionally strips HuJSON comments and trailing commas instead of preserving comment placement like the upstream Go formatter.
+- `format` produces deterministic HuJSON output that aims to match upstream `tailscale/hujson.Format` bytes for supported inputs, including comments, spacing, duplicate object members, and the trailing newline used by formatter-dependent hashes.
 - `patch` applies RFC 6902 operations against the standardized JSON model and returns a fresh HuJSON AST. Comment placement is not preserved across patch operations in this bootstrap.
 
 The unchanged parse/pack round-trip remains byte-preserving, which is the main compatibility guarantee needed to safely read and write HuJSON inputs before transformation.

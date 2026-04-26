@@ -1,30 +1,39 @@
 {
   "source": "github.com/tailscale/hujson format and fuzz seed tests",
   "formatCases": [
-    { "name": "null", "input": "null", "expected": "null" },
+    { "name": "null", "input": "null", "expected": "null\n" },
     {
       "name": "empty-object",
       "input": "{\n\r\t \n\r\t }",
-      "expected": "{}"
+      "expected": "{}\n"
     },
     {
       "name": "empty-array",
       "input": "[\n\r\t \n\r\t ]",
-      "expected": "[]"
+      "expected": "[]\n"
     },
     {
       "name": "two-object-members",
       "input": "{\"name\" \t \t:\"value\" \t \t,\"name\":\"value\"}",
-      "expected": "{\n  \"name\": \"value\"\n}",
-      "upstreamExpected": "{\"name\": \"value\", \"name\": \"value\"}",
-      "divergence": "This bootstrap formatter uses JSON.stringify with a two-space indent instead of upstream HuJSON single-line alignment rules."
+      "expected": "{\"name\": \"value\", \"name\": \"value\"}\n"
     },
     {
       "name": "two-array-elements",
       "input": "[null \t \t,null]",
-      "expected": "[\n  null,\n  null\n]",
-      "upstreamExpected": "[null, null]",
-      "divergence": "This bootstrap formatter uses JSON.stringify with a two-space indent instead of upstream HuJSON single-line spacing rules."
+      "expected": "[null, null]\n"
+    },
+    {
+      "name": "comments-and-trailing-commas",
+      "input": "{\n  // note\n  \"alpha\": [1, 2,],\n  \"beta\": {\n    \"nested\": true,\n  },\n}",
+      "expected": "{\n\t// note\n\t\"alpha\": [1, 2],\n\t\"beta\": {\n\t\t\"nested\": true,\n\t},\n}\n"
+    }
+  ],
+  "policyHashCases": [
+    {
+      "name": "github-actions-oidc-policy",
+      "input": "{\n  // Portable policy used by the GitHub Actions OIDC integration test.\n  // It intentionally uses tags instead of real users or devices.\n  \"tagOwners\": {\n    \"tag:ci-runner\": [\"autogroup:admin\"],\n    \"tag:fixture-server\": [\"autogroup:admin\"],\n  },\n\n  \"acls\": [\n    {\n      \"action\": \"accept\",\n      \"src\": [\"tag:ci-runner\"],\n      \"dst\": [\"tag:fixture-server:443\"],\n    },\n  ],\n\n  \"tests\": [\n    {\n      \"src\": \"tag:ci-runner\",\n      \"accept\": [\"tag:fixture-server:443\"],\n      \"deny\": [\"tag:fixture-server:22\"],\n    },\n  ],\n}",
+      "expected": "{\n\t// Portable policy used by the GitHub Actions OIDC integration test.\n\t// It intentionally uses tags instead of real users or devices.\n\t\"tagOwners\": {\n\t\t\"tag:ci-runner\":      [\"autogroup:admin\"],\n\t\t\"tag:fixture-server\": [\"autogroup:admin\"],\n\t},\n\n\t\"acls\": [\n\t\t{\n\t\t\t\"action\": \"accept\",\n\t\t\t\"src\":    [\"tag:ci-runner\"],\n\t\t\t\"dst\":    [\"tag:fixture-server:443\"],\n\t\t},\n\t],\n\n\t\"tests\": [\n\t\t{\n\t\t\t\"src\":    \"tag:ci-runner\",\n\t\t\t\"accept\": [\"tag:fixture-server:443\"],\n\t\t\t\"deny\":   [\"tag:fixture-server:22\"],\n\t\t},\n\t],\n}\n",
+      "sha256": "bb56d706b5246ba38a8427768948eca9cc116158badc0c216282fd2f19f5af29"
     }
   ],
   "fuzzInputs": [

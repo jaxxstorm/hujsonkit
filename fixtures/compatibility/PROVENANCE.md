@@ -6,11 +6,10 @@
 - `upstream/parse-transform.json` is derived from the upstream `tailscale/hujson` parse, `Minimize`, and `Standardize` table tests. It preserves language-agnostic inputs, expected observable outputs, expected parse failures, and divergence notes where the JavaScript/TypeScript API intentionally exposes semantic JSON rather than Go's exact in-place whitespace-preserving standardization.
 - `upstream/patch.json` is derived from upstream `Patch` tests, including RFC 6902 appendix cases. It records expected JSON results or expected public API errors, plus divergence notes for upstream comment-preserving patch cases and duplicate-member validation that are not observable through the current JavaScript/TypeScript patch API.
 - `upstream/pointer-traversal.json` is derived from upstream `Find` and `All` tests. It covers JSON Pointer token escaping and traversal order through observable packed values.
-- `upstream/format-fuzz.json` is derived from upstream `Format` examples and fuzz seeds. It keeps deterministic format cases that map to the bootstrap formatter and uses upstream fuzz seeds for invariant-style tests rather than runtime random fuzzing.
+- `upstream/format-fuzz.json` is derived from upstream `Format` examples and fuzz seeds. Supported format cases use exact bytes emitted by upstream `tailscale/hujson.Format`, including the trailing newline. The policy hash case covers the GitOps pusher behavior of hashing formatted policy bytes for local ETag comparison.
 
 ## Intentional bootstrap differences
 
-- `format/*` expects deterministic standard JSON output. Unlike upstream `tailscale/hujson`, this bootstrap formatter does not preserve HuJSON comments or trailing commas.
 - `patch/*` expects a clean JSON serialization after patch application. Comment placement is not preserved across patch operations in this bootstrap.
-- Upstream format cases that depend on comment preservation, single-line spacing, or alignment are retained with explicit divergence metadata when included in the shared manifests.
+- Upstream format cases that depend on comment preservation, single-line spacing, or alignment are expected to match upstream bytes when the parser supports the input.
 - Upstream Go tests assert internal `Value` offsets and concrete struct layout. JavaScript/TypeScript compatibility tests assert equivalent public behavior: parse success or failure, exact pack output, transformation bytes, JSON Pointer results, patch results, and traversal order.

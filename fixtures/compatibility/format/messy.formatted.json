@@ -1,9 +1,7 @@
 {
-  "alpha": [
-    1,
-    2
-  ],
-  "beta": {
-    "nested": true
-  }
+	// note
+	"alpha": [1, 2],
+	"beta": {
+		"nested": true,
+	},
 }
