@@ -32,7 +32,7 @@
     "verify": "npm test && npm run check:package && npm run check:consumers && npm run check:repo-consumer"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^6.0.3"
   },
   "repository": {
     "type": "git",
